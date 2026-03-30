@@ -2,7 +2,7 @@
 
 # ============================================================
 #  Dev Tools Installer for Ubuntu 20.04+
-#  Tools: git, homebrew, nodejs, python3, uv, docker desktop, zsh (optional)
+#  Tools: git, homebrew, nodejs, bun, python3, uv, docker desktop, zsh (optional)
 # ============================================================
 
 set -e
@@ -43,7 +43,7 @@ success "apt updated"
 # ============================================================
 # 1. GIT
 # ============================================================
-banner "1 / 7 — Git"
+banner "1 / 8 — Git"
 if is_installed git; then
   warn "git is already installed ($(git --version)) — skipping"
 else
@@ -54,7 +54,7 @@ fi
 # ============================================================
 # 2. HOMEBREW
 # ============================================================
-banner "2 / 7 — Homebrew"
+banner "2 / 8 — Homebrew"
 if is_installed brew; then
   warn "Homebrew is already installed — skipping"
 else
@@ -78,7 +78,7 @@ fi
 # ============================================================
 # 3. NODE.JS (via NodeSource LTS)
 # ============================================================
-banner "3 / 7 — Node.js"
+banner "3 / 8 — Node.js"
 if is_installed node; then
   warn "Node.js is already installed ($(node --version)) — skipping"
 else
@@ -89,9 +89,29 @@ else
 fi
 
 # ============================================================
-# 4. PYTHON 3
+# 4. BUN
 # ============================================================
-banner "4 / 7 — Python 3"
+banner "4 / 8 — Bun"
+if is_installed bun; then
+  warn "Bun is already installed ($(bun --version)) — skipping"
+else
+  info "Installing Bun via official installer..."
+  curl -fsSL https://bun.sh/install | bash
+
+  # Add bun to PATH for current session
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+  if ! grep -q '.bun/bin' "$HOME/.bashrc"; then
+    echo 'export BUN_INSTALL="$HOME/.bun"' >> "$HOME/.bashrc"
+    echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> "$HOME/.bashrc"
+  fi
+  success "Bun installed: $(bun --version 2>/dev/null || echo 'installed — restart terminal to verify')"
+fi
+
+# ============================================================
+# 5. PYTHON 3
+# ============================================================
+banner "5 / 8 — Python 3"
 if is_installed python3; then
   warn "Python 3 is already installed ($(python3 --version)) — skipping"
 else
@@ -100,9 +120,9 @@ else
 fi
 
 # ============================================================
-# 5. UV (Python package manager by Astral)
+# 6. UV (Python package manager by Astral)
 # ============================================================
-banner "5 / 7 — uv"
+banner "6 / 8 — uv"
 if is_installed uv; then
   warn "uv is already installed ($(uv --version)) — skipping"
 else
@@ -118,9 +138,9 @@ else
 fi
 
 # ============================================================
-# 6. DOCKER DESKTOP (GUI + CLI)
+# 7. DOCKER DESKTOP (GUI + CLI)
 # ============================================================
-banner "6 / 7 — Docker Desktop (GUI + CLI)"
+banner "7 / 8 — Docker Desktop (GUI + CLI)"
 
 if is_installed docker && [[ -d "/opt/docker-desktop" ]]; then
   warn "Docker Desktop is already installed ($(docker --version)) — skipping"
@@ -213,9 +233,9 @@ else
 fi
 
 # ============================================================
-# 7. ZSH + OH MY ZSH (Optional)
+# 8. ZSH + OH MY ZSH (Optional)
 # ============================================================
-banner "7 / 7 — Zsh + Oh My Zsh (Optional)"
+banner "8 / 8 — Zsh + Oh My Zsh (Optional)"
 echo -e "${YELLOW}Would you like to install Zsh and Oh My Zsh?${NC}"
 read -rp "Install Zsh + Oh My Zsh? [y/N]: " INSTALL_ZSH
 
@@ -243,8 +263,8 @@ fi
 # SUMMARY
 # ============================================================
 banner "Installation Summary"
-tools=("git" "brew" "node" "python3" "uv" "docker" "zsh")
-labels=("Git" "Homebrew" "Node.js" "Python 3" "uv" "Docker" "Zsh")
+tools=("git" "brew" "node" "bun" "python3" "uv" "docker" "zsh")
+labels=("Git" "Homebrew" "Node.js" "Bun" "Python 3" "uv" "Docker" "Zsh")
 
 for i in "${!tools[@]}"; do
   if is_installed "${tools[$i]}"; then

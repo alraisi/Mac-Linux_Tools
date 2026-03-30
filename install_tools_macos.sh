@@ -2,7 +2,7 @@
 
 # ============================================================
 #  Dev Tools Installer for macOS
-#  Tools: git, homebrew, nodejs, python3, uv, docker, zsh (optional)
+#  Tools: git, homebrew, nodejs, bun, python3, uv, docker, zsh (optional)
 # ============================================================
 
 set -e
@@ -41,7 +41,7 @@ success "Detected: macOS $MACOS_VERSION — compatible!"
 # ============================================================
 # 1. XCODE COMMAND LINE TOOLS (required for git & more)
 # ============================================================
-banner "1 / 7 — Xcode Command Line Tools"
+banner "1 / 8 — Xcode Command Line Tools"
 if xcode-select -p &>/dev/null; then
   warn "Xcode Command Line Tools already installed — skipping"
 else
@@ -55,7 +55,7 @@ fi
 # ============================================================
 # 2. HOMEBREW
 # ============================================================
-banner "2 / 7 — Homebrew"
+banner "2 / 8 — Homebrew"
 if is_installed brew; then
   warn "Homebrew is already installed — skipping"
 else
@@ -91,7 +91,7 @@ fi
 # ============================================================
 # 3. GIT
 # ============================================================
-banner "3 / 7 — Git"
+banner "3 / 8 — Git"
 if is_installed git && [[ "$(git --version)" != *"Apple"* ]]; then
   warn "git (non-Apple) is already installed ($(git --version)) — skipping"
 else
@@ -103,7 +103,7 @@ fi
 # ============================================================
 # 4. NODE.JS (LTS via Homebrew)
 # ============================================================
-banner "4 / 7 — Node.js"
+banner "4 / 8 — Node.js"
 if is_installed node; then
   warn "Node.js is already installed ($(node --version)) — skipping"
 else
@@ -115,9 +115,33 @@ else
 fi
 
 # ============================================================
-# 5. PYTHON 3
+# 5. BUN
 # ============================================================
-banner "5 / 7 — Python 3"
+banner "5 / 8 — Bun"
+if is_installed bun; then
+  warn "Bun is already installed ($(bun --version)) — skipping"
+else
+  info "Installing Bun via official installer..."
+  curl -fsSL https://bun.sh/install | bash
+
+  # Add bun to PATH for current session
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+  if ! grep -q '.bun/bin' "$HOME/.zprofile" 2>/dev/null; then
+    echo 'export BUN_INSTALL="$HOME/.bun"' >> "$HOME/.zprofile"
+    echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> "$HOME/.zprofile"
+  fi
+  if ! grep -q '.bun/bin' "$HOME/.bash_profile" 2>/dev/null; then
+    echo 'export BUN_INSTALL="$HOME/.bun"' >> "$HOME/.bash_profile"
+    echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> "$HOME/.bash_profile"
+  fi
+  success "Bun installed: $(bun --version 2>/dev/null || echo 'installed — restart terminal to verify')"
+fi
+
+# ============================================================
+# 6. PYTHON 3
+# ============================================================
+banner "6 / 8 — Python 3"
 if is_installed python3 && python3 --version &>/dev/null; then
   warn "Python 3 is already installed ($(python3 --version)) — skipping"
 else
@@ -127,9 +151,9 @@ else
 fi
 
 # ============================================================
-# 6. UV (Python package manager by Astral)
+# 7. UV (Python package manager by Astral)
 # ============================================================
-banner "6 / 7 — uv"
+banner "7 / 8 — uv"
 if is_installed uv; then
   warn "uv is already installed ($(uv --version)) — skipping"
 else
@@ -148,9 +172,9 @@ else
 fi
 
 # ============================================================
-# 7. DOCKER (Docker Desktop via Homebrew Cask)
+# 8. DOCKER (Docker Desktop via Homebrew Cask)
 # ============================================================
-banner "7 / 7 — Docker"
+banner "8 / 8 — Docker"
 if is_installed docker; then
   warn "Docker is already installed ($(docker --version)) — skipping"
 else
@@ -208,12 +232,13 @@ declare -A TOOL_LABELS=(
   ["git"]="Git"
   ["brew"]="Homebrew"
   ["node"]="Node.js"
+  ["bun"]="Bun"
   ["python3"]="Python 3"
   ["uv"]="uv"
   ["docker"]="Docker"
 )
 
-for tool in git brew node python3 uv docker; do
+for tool in git brew node bun python3 uv docker; do
   if is_installed "$tool"; then
     echo -e "  ${GREEN}✔${NC}  ${TOOL_LABELS[$tool]}"
   else
